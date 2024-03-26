@@ -48,22 +48,23 @@
     let fetchPromise = fetch('https://wedev-api.sky.pro/api/v1/elena-rybakova/comments', {
       method: 'GET'
     })
-    .then((response) => {
-      const jsonPromise = response.json();
-
-      return jsonPromise;
-    })
-    .then((responseData) => {
-        let i = 0;
+      .then((response) => {
+        const jsonPromise = response.json();
+        if (response.status === 500) {
+          throw Error(response.statusText);
+          alert('Сервер сломался, попробуй позже');
+        }
+        return jsonPromise;
+      })
+      .then((responseData) => {
         const appComments = responseData.comments.map((comment) => {
-          i++;
           return {
             name: comment.author.name,
             date: new Date(comment.date),
             text: comment.text,
             likes: comment.likes,
             isLiked: false,
-            id: i - 1,
+            id: comment.id,
             isEdit: false
           }
         });
@@ -71,6 +72,15 @@
         loader.style.display = 'none';
         comments = appComments;
         renderComments();
+
+        if (responseData.status === 500) throw Error(responseData.statusText);
+      })
+      .catch((e) => {
+        console.log(e);
+        if (e.message === 'Failed to fetch') {
+          alert('У вас упал интернет, попробуйте позже');
+          return;
+        }
       });
   };
 
@@ -91,46 +101,46 @@
       min = time.getMinutes();
     }
 
-    result = `${time.getDate()}.${time.getMonth()+1}.${time.getFullYear() - 2000} ${hours}:${min}`;
+    result = `${time.getDate()}.${time.getMonth() + 1}.${time.getFullYear() - 2000} ${hours}:${min}`;
 
     return result;
   }
 
   function renderComments() { //рендер комментариев
 
-    const commentsHTML = comments.map((student) => {
+    const commentsHTML = comments.map((comment, index) => {
       let liked = '';
       let textEdit = '';
       let btnEdit = '';
 
-      if (student.isLiked) {
+      if (comment.isLiked) {
         liked = ' -active-like'
       }
 
-      if (student.isEdit) {
-        textEdit = `<textarea class="textarea" id='textarea'>${student.text}</textarea>`;
+      if (comment.isEdit) {
+        textEdit = `<textarea class="textarea" id='textarea'>${comment.text}</textarea>`;
         btnEdit = `Сохранить`;
       } else {
         textEdit = `<div class="comment-text">
-          ${student.text}
+          ${comment.text}
         </div>`;
         btnEdit = `Редактировать`;
       }
 
-      return `<li class="comment" data-numComments="${student.id}">
+      return `<li class="comment" data-numComments="${index}">
       <div class="comment-header">
-        <div>${student.name}</div>
-        <div>${dateRender(student.date)}</div>
+        <div>${comment.name}</div>
+        <div>${dateRender(comment.date)}</div>
       </div>
       <div class="comment-body">` +
         textEdit +
         `</div>
       <div class="comment-footer">
-        <button class="button-edit" data-numComments="${student.id}">` + btnEdit + `</button>
+        <button class="button-edit" data-numComments="${index}">` + btnEdit + `</button>
         <div class="likes">
-          <span class="likes-counter">${student.likes}</span>
+          <span class="likes-counter">${comment.likes}</span>
           <button class="like-button` + liked
-        + `" data-numComments="${student.id}"></button>
+        + `" data-numComments="${index}"></button>
         </div>
       </div>
     </li>`
@@ -138,12 +148,19 @@
       .join('');
 
     listElement.innerHTML = commentsHTML;
-    initEventListeners();
+    funcLike();
     initEventButtonEdit();
     reply();
   }
 
   getCommentsFromServer();
+
+  function safeString(str) {
+    return str.replaceAll("&", "&amp;")
+      .replaceAll("<", "&lt;")
+      .replaceAll(">", "&gt;")
+      .replaceAll('"', "&quot;");
+  }
 
   function addComment() { //добавление комментария
     let date = new Date();
@@ -167,37 +184,53 @@
     let unsafeName = nameForm.value; // устранение уязвимости
     let unsafeComm = commentForm.value;
 
-    let safeName = unsafeName.replaceAll("&", "&amp;")
-      .replaceAll("<", "&lt;")
-      .replaceAll(">", "&gt;")
-      .replaceAll('"', "&quot;");
-    let safeComm = unsafeComm.replaceAll("&", "&amp;")
-      .replaceAll("<", "&lt;")
-      .replaceAll(">", "&gt;")
-      .replaceAll('"', "&quot;")
+    let safeName = safeString(unsafeName);
+    let safeComm = safeString(unsafeComm)
       .replaceAll('QUOTE_BEGIN', "<div class='quote'>")
       .replaceAll('QUOTE_END', '</div>');
 
     addForm.style.display = 'none';
     loader.textContent = 'Комментарий добавляется...';
     loader.style.display = 'block';
+    let enteredName = nameForm.value;
+    let enteredComment = commentForm.value;
 
     let fetchPromise = fetch('https://wedev-api.sky.pro/api/v1/elena-rybakova/comments', {
       method: 'POST',
       body: JSON.stringify({
         text: safeComm,
         name: safeName,
+        forceError: true
       })
-    })
-    .then(() => {
+    }).then((res) => {
       addForm.style.display = 'flex';
       loader.style.display = 'none';
+
+      if (res.status === 400) {
+        alert('Имя и комментарий должны быть не короче 3 символов');
+        throw Error(res.statusText);
+      } else if (res.status === 500) {
+        alert('Сервер сломался, попробуй позже');
+        throw Error(res.statusText);
+      }
+    }).catch(e => {
+      console.log(e);
+      commentForm.value = enteredComment;
+      nameForm.value = enteredName;
+      if (e.message === 'Internal Server Error') {
+        addComment();
+      } else if (e.message === 'Failed to fetch') {
+        alert('У вас упал интернет, попробуйте позже');
+        addForm.style.display = 'flex';
+        loader.textContent = '';
+        loader.style.display = 'none';
+        return;
+      }
     })
 
+    getCommentsFromServer();
     nameForm.value = '';
     commentForm.value = '';
-
-    getCommentsFromServer();
   }
 
   button.disabled = true; //проверка заполненности полей
@@ -217,7 +250,7 @@
   button.addEventListener("click", addComment);
 
   commentForm.addEventListener('keypress', (e) => { //отправление комментария по кнопке enter
-    if (e.keyCode == 13) {
+    if (e.key === 'Enter') {
       // button.click();
       addComment();
     }
@@ -234,12 +267,12 @@
     getCommentsFromServer();
   })
 
-  function initEventListeners() { //работа лайков
+  function funcLike() { //работа лайков
     let likeButtons = document.querySelectorAll('.like-button');
     for (let likeButton of likeButtons) {
       likeButton.addEventListener('click', (event) => {
-
         event.stopPropagation();
+
         let numComm = likeButton.getAttribute('data-numComments');
 
         if (comments[numComm].isLiked) {
@@ -283,7 +316,6 @@
     for (let replyComm of replyComms) {
       replyComm.addEventListener('click', () => {
         let numComm = replyComm.getAttribute('data-numComments');
-        console.log('Ответ сработал', numComm);
         commentForm.value = `QUOTE_BEGIN${comments[numComm].name}:
 ${comments[numComm].text} QUOTE_END
 
