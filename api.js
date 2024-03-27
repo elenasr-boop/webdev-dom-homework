@@ -1,4 +1,4 @@
-import { loader, addForm, commentForm, nameForm} from "./main.js";
+import { loader, container, addFormHtml, deleteButtonHtml } from "./main.js";
 import { renderComments } from "./render.js";
 import { addComment } from "./initevent.js";
 
@@ -28,7 +28,6 @@ export function getCommentsFromServer(comments) {
                 }
             });
 
-            loader.style.display = 'none';
             comments = appComments;
             renderComments(comments);
 
@@ -44,7 +43,7 @@ export function getCommentsFromServer(comments) {
         });
 };
 
-export function postComment(safeComm, safeName, time) {
+export function postComment(safeComm, safeName, time, nameForm, commentForm, list, button) {
     let enteredName = nameForm.value;
     let enteredComment = commentForm.value;
 
@@ -57,8 +56,7 @@ export function postComment(safeComm, safeName, time) {
             forceError: true
         })
     }).then((res) => {
-        addForm.style.display = 'flex';
-        loader.style.display = 'none';
+        container.innerHTML = list + addFormHtml + deleteButtonHtml;
 
         if (res.status === 400) {
             alert('Имя и комментарий должны быть не короче 3 символов');
@@ -72,7 +70,7 @@ export function postComment(safeComm, safeName, time) {
         commentForm.value = enteredComment;
         nameForm.value = enteredName;
         if (e.message === 'Internal Server Error') {
-            addComment();
+            addComment(button, list, nameForm, commentForm);
         } else if (e.message === 'Failed to fetch') {
             alert('У вас упал интернет, попробуйте позже');
             addForm.style.display = 'flex';

@@ -1,7 +1,7 @@
 import { dateRender } from "./utils.js";
-import { funcLike, initEventButtonEdit, reply } from "./initevent.js"
+import { funcLike, initEventButtonEdit, reply, addComment } from "./initevent.js";
+import { container, addFormHtml, deleteButtonHtml } from "./main.js";
 
-const listElement = document.getElementById('comments');
 
 export function renderComments(comments) { //рендер комментариев
 
@@ -44,8 +44,14 @@ export function renderComments(comments) { //рендер комментарие
     })
         .join('');
 
-    listElement.innerHTML = commentsHTML;
+    container.innerHTML = '<ul class="comments" id="comments">' + commentsHTML + '</ul>' + addFormHtml + deleteButtonHtml;
+    const list = '<ul class="comments" id="comments">' + commentsHTML + '</ul>';
+    const nameForm = document.getElementById('add-form-name');
+    const commentForm = document.getElementById('add-form-text');
+    const button = document.getElementById('add-form-button');
+    
+    addComment(button, list, nameForm, commentForm);
     funcLike(comments);
-    initEventButtonEdit(comments);
-    reply(comments);
+    initEventButtonEdit(comments, nameForm, commentForm);
+    reply(comments, commentForm);
 }

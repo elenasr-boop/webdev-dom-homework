@@ -1,25 +1,25 @@
 import { getCommentsFromServer } from "./api.js";
-import { addComment } from "./initevent.js";
 
 let comments = [ /*объявление массива комментариев*/];
 
-export const nameForm = document.getElementById('add-form-name');
-export const commentForm = document.getElementById('add-form-text');
-export const button = document.getElementById('add-form-button');
-export let addForm = document.getElementById('add-form');
-export let loader = document.getElementById('bimbo');
+export const container = document.getElementById('container');
 
+export let loader = '';
 
-loader.style.display = 'block';
-loader.textContent = 'Пожалуйста, подождите, загружаю комментарии...';
+export const addFormHtml = `<div class="add-form" id="add-form">
+<input type="text" class="add-form-name" id="add-form-name" placeholder="Введите ваше имя" />
+<textarea type="textarea" class="add-form-text" id="add-form-text" placeholder="Введите ваш коментарий"
+  rows="4"></textarea>
+<div class="add-form-row">
+  <button class="add-form-button" id="add-form-button">Написать</button>
+</div>
+</div>`;
+
+export let deleteButtonHtml = '<div class="delete"><button class="button" id="delete-button">Удалить последний комментарий</button></div>';
+
+let commentsList = '<ul class="comments" id="comments"></ul>';
+
+loader = '<div id="bimbo" class="bimbo">Пожалуйста, подождите, коммментарии загружаются...</div>';
+container.innerHTML = loader;
 
 getCommentsFromServer(comments);
-
-button.addEventListener("click", addComment);
-
-commentForm.addEventListener('keypress', (e) => { //отправление комментария по кнопке enter
-  if (e.key === 'Enter') {
-    // button.click();
-    addComment();
-  }
-})

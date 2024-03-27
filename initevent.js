@@ -1,9 +1,11 @@
 import { renderComments } from "./render.js";
 import { safeString } from "./utils.js";
-import { commentForm, nameForm, addForm, loader } from "./main.js";
+import { loader, container } from "./main.js";
 import { postComment, getCommentsFromServer } from "./api.js";
 
-const deleteButton = document.getElementById('delete-button');
+// const deleteButton = document.getElementById('delete-button');
+export const nameForm = document.getElementById('add-form-name');
+export const commentForm = document.getElementById('add-form-text');
 
 export function funcLike(arr) { //работа лайков
     let likeButtons = document.querySelectorAll('.like-button');
@@ -26,7 +28,7 @@ export function funcLike(arr) { //работа лайков
     }
 }
 
-export function reply(arr) {
+export function reply(arr, commentForm) {
     let replyComms = document.querySelectorAll('.comment');
 
     for (let replyComm of replyComms) {
@@ -40,39 +42,45 @@ export function reply(arr) {
     }
 }
 
-export function addComment() { //добавление комментария
-    let time = new Date();
+export function addComment(button, list, nameForm, commentForm) { //добавление комментария
+    button.addEventListener("click", () => {
+        let time = new Date();
 
-    nameForm.classList.remove('error');
-    commentForm.classList.remove('error');
+        nameForm.classList.remove('error');
+        commentForm.classList.remove('error');
 
-    if ((nameForm.value.trim() == '') && (commentForm.value.trim() == '')) {
-        nameForm.classList.add('error');
-        commentForm.classList.add('error');
-        return;
-    }
-    else if (nameForm.value.trim() == '') {
-        nameForm.classList.add('error');
-        return;
-    } else if (commentForm.value.trim() == '') {
-        commentForm.classList.add('error');
-        return;
-    }
+        if ((nameForm.value.trim() == '') && (commentForm.value.trim() == '')) {
+            nameForm.classList.add('error');
+            commentForm.classList.add('error');
+            return;
+        }
+        else if (nameForm.value.trim() == '') {
+            nameForm.classList.add('error');
+            return;
+        } else if (commentForm.value.trim() == '') {
+            commentForm.classList.add('error');
+            return;
+        }
 
-    let safeName = safeString(nameForm.value);
-    let safeComm = safeString(commentForm.value)
-        .replaceAll('QUOTE_BEGIN', "<div class='quote'>")
-        .replaceAll('QUOTE_END', '</div>');
+        let safeName = safeString(nameForm.value);
+        let safeComm = safeString(commentForm.value)
+            .replaceAll('QUOTE_BEGIN', "<div class='quote'>")
+            .replaceAll('QUOTE_END', '</div>');
 
-    addForm.style.display = 'none';
-    loader.textContent = 'Комментарий добавляется...';
-    loader.style.display = 'block';
+        container.innerHTML = list + '<div id="bimbo" class="bimbo">Комментарий добавляется...</div>';
 
-    postComment(safeComm, safeName, time);
+        postComment(safeComm, safeName, time, nameForm, commentForm, list, button);
 
-    getCommentsFromServer(comments);
-    nameForm.value = '';
-    commentForm.value = '';
+        getCommentsFromServer([]);
+        nameForm.value = '';
+        commentForm.value = '';
+    });
+
+    commentForm.addEventListener('keypress', (e) => { //отправление комментария по кнопке enter
+        if (e.key === 'Enter') {
+            button.click();
+        }
+    })
 }
 
 export function initEventButtonEdit(arr) { //редактирование комментария
@@ -95,6 +103,6 @@ export function initEventButtonEdit(arr) { //редактирование ком
     }
 }
 
-deleteButton.addEventListener('click', () => { //удаление комментария
-    alert('У API нет метода DELETE.');
-})
+// deleteButton.addEventListener('click', () => { //удаление комментария
+//     alert('У API нет метода DELETE.');
+// })
