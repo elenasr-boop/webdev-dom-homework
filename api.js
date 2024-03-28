@@ -4,14 +4,14 @@ import { addComment } from "./initevent.js";
 
 export function getCommentsFromServer(comments) {
 
-    let fetchPromise = fetch('https://wedev-api.sky.pro/api/v1/elena-rybakova/comments', {
+    return fetch('https://wedev-api.sky.pro/api/v1/elena-rybakova/comments', {
         method: 'GET'
     })
         .then((response) => {
             const jsonPromise = response.json();
             if (response.status === 500) {
                 alert('Сервер сломался, попробуй позже');
-                throw Error(response.statusText);
+                throw new Error(response.statusText);
             }
             return jsonPromise;
         })
@@ -31,8 +31,7 @@ export function getCommentsFromServer(comments) {
             comments = appComments;
             renderComments(comments);
 
-            if (responseData.status === 500) throw Error(responseData.statusText);
-            return comments;
+            if (responseData.status === 500) throw new Error(responseData.statusText);
         })
         .catch((e) => {
             console.log(e);
@@ -60,10 +59,10 @@ export function postComment(safeComm, safeName, time, nameForm, commentForm, lis
 
         if (res.status === 400) {
             alert('Имя и комментарий должны быть не короче 3 символов');
-            throw Error(res.statusText);
+            throw new Error(res.statusText);
         } else if (res.status === 500) {
             alert('Сервер сломался, попробуй позже');
-            throw Error(res.statusText);
+            throw new Error(res.statusText);
         }
     }).catch(e => {
         console.log(e);

@@ -1,6 +1,6 @@
 import { getCommentsFromServer } from "./api.js";
 
-let comments = [ /*объявление массива комментариев*/];
+let comments = [];
 
 export const container = document.getElementById('container');
 
@@ -16,8 +16,6 @@ export const addFormHtml = `<div class="add-form" id="add-form">
 </div>`;
 
 export let deleteButtonHtml = '<div class="delete"><button class="button" id="delete-button">Удалить последний комментарий</button></div>';
-
-let commentsList = '<ul class="comments" id="comments"></ul>';
 
 loader = '<div id="bimbo" class="bimbo">Пожалуйста, подождите, коммментарии загружаются...</div>';
 container.innerHTML = loader;

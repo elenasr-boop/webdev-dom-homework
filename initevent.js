@@ -1,6 +1,6 @@
 import { renderComments } from "./render.js";
 import { safeString } from "./utils.js";
-import { loader, container } from "./main.js";
+import { container } from "./main.js";
 import { postComment, getCommentsFromServer } from "./api.js";
 
 // const deleteButton = document.getElementById('delete-button');
