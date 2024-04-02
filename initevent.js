@@ -1,9 +1,7 @@
-import { renderComments } from "./render.js";
+import { renderAddForm, renderComments, renderLoadingComment } from "./render.js";
 import { safeString } from "./utils.js";
-import { container } from "./main.js";
 import { postComment, getCommentsFromServer } from "./api.js";
 
-// const deleteButton = document.getElementById('delete-button');
 export const nameForm = document.getElementById('add-form-name');
 export const commentForm = document.getElementById('add-form-text');
 
@@ -28,21 +26,27 @@ export function funcLike(arr) { //работа лайков
     }
 }
 
-export function reply(arr, commentForm) {
+export function reply(arr) {
     let replyComms = document.querySelectorAll('.comment');
 
     for (let replyComm of replyComms) {
         replyComm.addEventListener('click', () => {
             let numComm = replyComm.getAttribute('data-numComments');
-            commentForm.value = `QUOTE_BEGIN${arr[numComm].name}:
-  ${arr[numComm].text} QUOTE_END
-  
-  `;
+            let replyingComm = `QUOTE_BEGIN${arr[numComm].name}:
+            ${arr[numComm].text} QUOTE_END
+            
+            `
+
+            renderAddForm('', replyingComm);
         })
     }
 }
 
-export function addComment(button, list, nameForm, commentForm) { //добавление комментария
+export function addComment() { //добавление комментария
+    const nameForm = document.getElementById('add-form-name');
+    const commentForm = document.getElementById('add-form-text');
+    const button = document.getElementById('add-form-button');
+
     button.addEventListener("click", () => {
         let time = new Date();
 
@@ -67,13 +71,11 @@ export function addComment(button, list, nameForm, commentForm) { //добавл
             .replaceAll('QUOTE_BEGIN', "<div class='quote'>")
             .replaceAll('QUOTE_END', '</div>');
 
-        container.innerHTML = list + '<div id="bimbo" class="bimbo">Комментарий добавляется...</div>';
+        postComment(safeComm, safeName, time);
 
-        postComment(safeComm, safeName, time, nameForm, commentForm, list, button);
-
-        getCommentsFromServer([]);
-        nameForm.value = '';
-        commentForm.value = '';
+        // getCommentsFromServer([]);
+        // nameForm.value = '';
+        // commentForm.value = '';
     });
 
     commentForm.addEventListener('keypress', (e) => { //отправление комментария по кнопке enter

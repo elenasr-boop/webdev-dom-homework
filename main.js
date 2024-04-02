@@ -1,6 +1,9 @@
 import { getCommentsFromServer } from "./api.js";
 
-let comments = [];
+export let comments = [];
+export const setComments = (newComments) => {
+  comments = newComments;
+}
 
 export const container = document.getElementById('container');
 
@@ -15,9 +18,7 @@ export const addFormHtml = `<div class="add-form" id="add-form">
 </div>
 </div>`;
 
-export let deleteButtonHtml = '<div class="delete"><button class="button" id="delete-button">Удалить последний комментарий</button></div>';
-
 loader = '<div id="bimbo" class="bimbo">Пожалуйста, подождите, коммментарии загружаются...</div>';
 container.innerHTML = loader;
 
-getCommentsFromServer(comments);
+getCommentsFromServer(); 
