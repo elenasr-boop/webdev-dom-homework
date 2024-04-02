@@ -46,7 +46,7 @@ export function postComment(safeComm, safeName, time) {
             text: safeComm,
             name: safeName,
             date: time,
-            // forceError: true
+            forceError: true
         })
     }).then((res) => {
         if (res.status === 400) {

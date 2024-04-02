@@ -1,4 +1,4 @@
-import { renderAddForm, renderComments, renderLoadingComment } from "./render.js";
+import { renderAddForm, renderComments } from "./render.js";
 import { safeString } from "./utils.js";
 import { postComment, getCommentsFromServer } from "./api.js";
 
@@ -72,10 +72,6 @@ export function addComment() { //добавление комментария
             .replaceAll('QUOTE_END', '</div>');
 
         postComment(safeComm, safeName, time);
-
-        // getCommentsFromServer([]);
-        // nameForm.value = '';
-        // commentForm.value = '';
     });
 
     commentForm.addEventListener('keypress', (e) => { //отправление комментария по кнопке enter
@@ -104,7 +100,3 @@ export function initEventButtonEdit(arr) { //редактирование ком
         });
     }
 }
-
-// deleteButton.addEventListener('click', () => { //удаление комментария
-//     alert('У API нет метода DELETE.');
-// })

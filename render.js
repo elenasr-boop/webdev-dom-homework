@@ -71,5 +71,4 @@ export function renderAddForm(name, text) {
   formElement.classList.add('form-add-form');
   formElement.innerHTML = form;
   container.appendChild(formElement);
-  addComment();
 }
