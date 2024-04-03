@@ -1,6 +1,6 @@
-import { renderAddForm, renderComments } from "./render.js";
+import { renderAddForm, renderAuthPage, renderComments, renderRegisterForm } from "./render.js";
 import { safeString } from "./utils.js";
-import { postComment, getCommentsFromServer } from "./api.js";
+import { postComment, getCommentsFromServer, authorization } from "./api.js";
 
 export const nameForm = document.getElementById('add-form-name');
 export const commentForm = document.getElementById('add-form-text');
@@ -99,4 +99,43 @@ export function initEventButtonEdit(arr) { //редактирование ком
             getCommentsFromServer(arr);
         });
     }
+}
+
+export function registerButton () {
+    let regButton = document.getElementById('button-register');
+    regButton.addEventListener('click', () => {
+        console.log('войти');
+        renderRegisterForm();
+    })
+}
+
+export function loginButton () {
+    let logButton = document.getElementById('button-login');
+    let login = document.getElementById('login').value;
+    let password = document.getElementById('password').value;
+
+    logButton.addEventListener('click', () => {
+        console.log('тык.');
+        authorization(login, password);
+    })
+}
+
+export function registration () {
+    let register = document.getElementById('registration');
+    let name = document.getElementById('register-name').value;
+    let login = document.getElementById('register-login').value;
+    let password = document.getElementById('register-password').value;
+
+    register.addEventListener('click', () => {
+        console.log('Регистрация');
+        login(name, login, password);
+    })
+}
+
+export function mainLogButton() {
+    let log = document.getElementById('log-button');
+
+    log.addEventListener('click', () => {
+        renderAuthPage();
+    })
 }

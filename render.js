@@ -1,5 +1,5 @@
 import { dateRender } from "./utils.js";
-import { funcLike, initEventButtonEdit, reply, addComment } from "./initevent.js";
+import { funcLike, initEventButtonEdit, reply, addComment, mainLogButton, loginButton, registerButton, registration } from "./initevent.js";
 import { container, comments } from "./main.js";
 
 
@@ -44,13 +44,14 @@ export function renderComments() { //рендер комментариев
   })
     .join('');
 
-  container.innerHTML = '<ul class="comments" id="comments">' + commentsHTML + '</ul>';
+  container.innerHTML = `<button id="log-button" class="add-form-button">Войти</button>`+'<ul class="comments" id="comments">' + commentsHTML + '</ul>';
 
   renderAddForm('', '');
   addComment();
   funcLike(comments);
   initEventButtonEdit(comments);
   reply(comments);
+  mainLogButton();
 }
 
 export function renderAddForm(name, text) {
@@ -71,4 +72,35 @@ export function renderAddForm(name, text) {
   formElement.classList.add('form-add-form');
   formElement.innerHTML = form;
   container.appendChild(formElement);
+}
+
+export function renderAuthPage() {
+  container.innerHTML = `<div> 
+  <h2 class="">Войдите в свой аккаунт</h2>
+  <div class="auth-form">
+    <input placeholder="Введите логин" id="login" class="add-form-name">
+    <input placeholder="Введите пароль" id="password" class="add-form-name">
+    <button id="button-login" class="add-form-button">Войти</button>
+  </div>  
+  <div class="button-register">
+    <button class="button-register add-form-button" id="button-register">Ещё нет аккаунта? Зарегестрируйтесь</button>
+  </div>
+</div>`;
+
+loginButton();
+registerButton();
+}
+
+export function renderRegisterForm () {
+  container.innerHTML = `
+  <h2>Регистрация</h2>
+  <div class="register-form">
+    <input placeholder="Введите имя" id="register-name" class="add-form-name">
+    <input placeholder="Введите логин" id="register-login" class="add-form-name">
+    <input placeholder="Введите пароль" id="register-password" class="add-form-name">
+  </div>
+  <button id="registration" class="add-form-button">Зарегестрироваться</button>
+  <div`
+
+  registration();
 }
