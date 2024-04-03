@@ -1,62 +1,59 @@
 import { dateRender } from "./utils.js";
-import { funcLike, initEventButtonEdit, reply, addComment, mainLogButton, loginButton, registerButton, registration } from "./initevent.js";
+import { reply, addComment, mainLogButton, loginButton, registerButton, registration, funcLike, deleteButton } from "./initevent.js";
 import { container, comments } from "./main.js";
+import { token, userName } from "./api.js";
 
 
 export function renderComments() { //рендер комментариев
 
-  const commentsHTML = comments.map((comment, index) => {
+  const commentsHTML = comments.map((comment) => {
     let liked = '';
-    let textEdit = '';
-    let btnEdit = '';
 
     if (comment.isLiked) {
       liked = ' -active-like'
     }
 
-    if (comment.isEdit) {
-      textEdit = `<textarea class="textarea" id='textarea'>${comment.text}</textarea>`;
-      btnEdit = `Сохранить`;
-    } else {
-      textEdit = `<div class="comment-text">
-          ${comment.text}
-        </div>`;
-      btnEdit = `Редактировать`;
-    }
-
-    return `<li class="comment" data-numComments="${index}">
+    return `<li class="comment" data-commId="${comment.text}">
       <div class="comment-header">
-        <div>${comment.name}</div>
+        <div>${comment.author.name}</div>
         <div>${dateRender(comment.date)}</div>
       </div>
-      <div class="comment-body">` +
-      textEdit +
-      `</div>
+      <div class="comment-body">
+        <div class="comment-text">${comment.text}</div>
+      </div>
       <div class="comment-footer">
-        <button class="button-edit" data-numComments="${index}">` + btnEdit + `</button>
+        <button class="button-delete add-form-button" data-commId="${comment.id}">Удалить комментарий</button>
         <div class="likes">
           <span class="likes-counter">${comment.likes}</span>
           <button class="like-button` + liked
-      + `" data-numComments="${index}"></button>
+      + `" data-commId="${comment.id}"></button>
         </div>
       </div>
     </li>`
   })
     .join('');
 
-  container.innerHTML = `<button id="log-button" class="add-form-button">Войти</button>`+'<ul class="comments" id="comments">' + commentsHTML + '</ul>';
-
-  renderAddForm('', '');
-  addComment();
-  funcLike(comments);
-  initEventButtonEdit(comments);
-  reply(comments);
+  if (token === '') {
+    container.innerHTML = '<ul class="comments" id="comments">' + commentsHTML + '</ul>' + `<button id="log-button" class="add-form-button">Чтобы добавить комментарий, авторизуйтесь</button>`;
+    funcLike();
+    deleteButton();
   mainLogButton();
+  } else {
+    container.innerHTML = '<ul class="comments" id="comments">' + commentsHTML + '</ul>';
+    renderAddForm(userName, '');
+    addComment();
+    deleteButton();
+    funcLike();
+    reply();
+  }
+
+  
+  // initEventButtonEdit(comments);
 }
 
 export function renderAddForm(name, text) {
   const form = `<div class="add-form" id="add-form">
-  <input type="text" class="add-form-name" id="add-form-name" placeholder="Введите ваше имя" value="${name}"/>
+  <input type="text" class="add-form-name" id="add-form-name" placeholder="Введите ваше имя" value="${name}" readonly>
   <textarea type="textarea" class="add-form-text" id="add-form-text" placeholder="Введите ваш коментарий"
     rows="4">${text}</textarea>
   <div class="add-form-row">
@@ -79,7 +76,7 @@ export function renderAuthPage() {
   <h2 class="">Войдите в свой аккаунт</h2>
   <div class="auth-form">
     <input placeholder="Введите логин" id="login" class="add-form-name">
-    <input placeholder="Введите пароль" id="password" class="add-form-name">
+    <input placeholder="Введите пароль" id="password" class="add-form-name" type="password">
     <button id="button-login" class="add-form-button">Войти</button>
   </div>  
   <div class="button-register">
@@ -97,10 +94,11 @@ export function renderRegisterForm () {
   <div class="register-form">
     <input placeholder="Введите имя" id="register-name" class="add-form-name">
     <input placeholder="Введите логин" id="register-login" class="add-form-name">
-    <input placeholder="Введите пароль" id="register-password" class="add-form-name">
+    <input placeholder="Введите пароль" id="register-password" class="add-form-name" type="password">
   </div>
-  <button id="registration" class="add-form-button">Зарегестрироваться</button>
+  <button id="registration" class="add-form-button">Войти</button>
   <div`
 
   registration();
 }
+

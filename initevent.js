@@ -1,43 +1,29 @@
-import { renderAddForm, renderAuthPage, renderComments, renderRegisterForm } from "./render.js";
+import { renderAddForm, renderAuthPage, renderRegisterForm } from "./render.js";
 import { safeString } from "./utils.js";
-import { postComment, getCommentsFromServer, authorization } from "./api.js";
+import { postComment, authorization, registrationApi, apiLike, userName, deleteComment } from "./api.js";
 
-export const nameForm = document.getElementById('add-form-name');
-export const commentForm = document.getElementById('add-form-text');
-
-export function funcLike(arr) { //работа лайков
+export function funcLike() { //работа лайков
     let likeButtons = document.querySelectorAll('.like-button');
     for (let likeButton of likeButtons) {
         likeButton.addEventListener('click', (event) => {
+
             event.stopPropagation();
 
-            let numComm = likeButton.getAttribute('data-numComments');
+            let id = likeButton.getAttribute('data-commId');
 
-            if (arr[numComm].isLiked) {
-                arr[numComm].isLiked = !arr[numComm].isLiked;
-                arr[numComm].likes--;
-            } else {
-                arr[numComm].isLiked = !arr[numComm].isLiked;
-                arr[numComm].likes++;
-            }
-
-            renderComments(arr);
+            apiLike(id);
         })
     }
 }
 
-export function reply(arr) {
+export function reply() {
     let replyComms = document.querySelectorAll('.comment');
 
     for (let replyComm of replyComms) {
         replyComm.addEventListener('click', () => {
-            let numComm = replyComm.getAttribute('data-numComments');
-            let replyingComm = `QUOTE_BEGIN${arr[numComm].name}:
-            ${arr[numComm].text} QUOTE_END
-            
-            `
+            let textToReply = replyComm.getAttribute('data-commId');
 
-            renderAddForm('', replyingComm);
+            renderAddForm(userName, textToReply)
         })
     }
 }
@@ -50,18 +36,9 @@ export function addComment() { //добавление комментария
     button.addEventListener("click", () => {
         let time = new Date();
 
-        nameForm.classList.remove('error');
         commentForm.classList.remove('error');
 
-        if ((nameForm.value.trim() == '') && (commentForm.value.trim() == '')) {
-            nameForm.classList.add('error');
-            commentForm.classList.add('error');
-            return;
-        }
-        else if (nameForm.value.trim() == '') {
-            nameForm.classList.add('error');
-            return;
-        } else if (commentForm.value.trim() == '') {
+        if (commentForm.value.trim() == '') {
             commentForm.classList.add('error');
             return;
         }
@@ -81,25 +58,25 @@ export function addComment() { //добавление комментария
     })
 }
 
-export function initEventButtonEdit(arr) { //редактирование комментария
-    let buttonsEdit = document.querySelectorAll('.button-edit');
+// export function initEventButtonEdit(arr) { //редактирование комментария
+//     let buttonsEdit = document.querySelectorAll('.button-edit');
 
-    for (let buttonEdit of buttonsEdit) {
-        buttonEdit.addEventListener('click', (event) => {
-            event.stopPropagation();
-            let numComm = buttonEdit.getAttribute('data-numComments');
-            let txtEdit = document.getElementById('textarea');
+//     for (let buttonEdit of buttonsEdit) {
+//         buttonEdit.addEventListener('click', (event) => {
+//             event.stopPropagation();
+//             let numComm = buttonEdit.getAttribute('data-commId');
+//             let txtEdit = document.getElementById('textarea');
 
-            arr[numComm].isEdit = !arr[numComm].isEdit;
+//             arr[numComm].isEdit = !arr[numComm].isEdit;
 
-            if (!arr[numComm].isEdit) {
-                arr[numComm].text = txtEdit.value;
-            }
+//             if (!arr[numComm].isEdit) {
+//                 arr[numComm].text = txtEdit.value;
+//             }
 
-            getCommentsFromServer(arr);
-        });
-    }
-}
+//             getCommentsFromServer(arr);
+//         });
+//     }
+// }
 
 export function registerButton () {
     let regButton = document.getElementById('button-register');
@@ -111,24 +88,27 @@ export function registerButton () {
 
 export function loginButton () {
     let logButton = document.getElementById('button-login');
-    let login = document.getElementById('login').value;
-    let password = document.getElementById('password').value;
-
+  
     logButton.addEventListener('click', () => {
-        console.log('тык.');
+        let login = document.getElementById('login').value;
+        let password = document.getElementById('password').value;
+    
         authorization(login, password);
     })
 }
 
 export function registration () {
     let register = document.getElementById('registration');
-    let name = document.getElementById('register-name').value;
-    let login = document.getElementById('register-login').value;
-    let password = document.getElementById('register-password').value;
 
     register.addEventListener('click', () => {
-        console.log('Регистрация');
-        login(name, login, password);
+        
+    let nameForm = document.getElementById('register-name');
+    let loginForm = document.getElementById('register-login');
+    let passwordForm = document.getElementById('register-password');
+    let name = nameForm.value;
+    let login = loginForm.value;
+    let password = passwordForm.value;
+        registrationApi(name, login, password);
     })
 }
 
@@ -138,4 +118,14 @@ export function mainLogButton() {
     log.addEventListener('click', () => {
         renderAuthPage();
     })
+}
+
+export function deleteButton() {
+    const buttonsDelete = document.querySelectorAll('.button-delete');
+    for (let buttonDelete of buttonsDelete) {
+        buttonDelete.addEventListener('click', () => {
+            let id = buttonDelete.getAttribute('data-commId');
+            deleteComment(id);
+        });
+    }
 }

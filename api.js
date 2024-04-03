@@ -2,13 +2,15 @@ import { comments, setComments } from "./main.js";
 import { renderAddForm, renderComments } from "./render.js";
 
 const baseHost = 'https://wedev-api.sky.pro/api/v2/elena-rybakova';
+export let token = '';
+export let userName = '';
 
 export function getCommentsFromServer() {
 
     return fetch(baseHost + '/comments', {
         method: 'GET', 
         headers: {
-            authorization: token,
+            authorization: `Bearer ${token}`,
         }
     })
         .then((response) => {
@@ -20,12 +22,21 @@ export function getCommentsFromServer() {
             return jsonPromise;
         })
         .then((responseData) => {
+            
+
             let appComments = responseData.comments.map((comment) => {
+                let isLike = false;
+                if (token === '') {
+                    isLike = false;
+                } else {
+                    isLike = comment.isLiked;
+                }
+
                 return {
                     id: comment.id,
                     date: new Date(comment.date),
                     likes: comment.likes,
-                    isLiked: false,
+                    isLiked: isLike,
                     text: comment.text,
                     author: {
                         id: comment.author.id,
@@ -51,7 +62,7 @@ export function postComment(safeComm, safeName, time) {
     return fetch(baseHost + '/comments', {
         method: 'POST',
         headers: {
-            authorization: token,
+            authorization: `Bearer ${token}`,
         },
         body: JSON.stringify({
             text: safeComm,
@@ -89,7 +100,7 @@ export function deleteComment (id) {
     return fetch(baseHost + '/comments/' + id, {
         method: "DELETE",
         headers: {
-            authorization: token,
+            authorization: `Bearer ${token}`,
         }
     }).then((res) => {
         if (res.status === 500) {
@@ -99,6 +110,8 @@ export function deleteComment (id) {
             alert('Пожалуйста, авторизуйтесь');
             throw new Error (res.statusText);
         }
+
+        getCommentsFromServer();
     }).catch((e) => {
         console.log(e);
         if (e.message === 'Failed to fetch') {
@@ -111,7 +124,7 @@ export function apiLike (id) {
     return fetch(baseHost + '/comments/' + id + '/toggle-like', {
         method: "POST", 
         headers: {
-            authorization: token,
+            authorization: `Bearer ${token}`,
         }
     }).then ((res) => {
         if (res.status === 401) {
@@ -122,22 +135,9 @@ export function apiLike (id) {
             throw new Error (res.statusText);
         }
 
-        return res.json();
-    }).then((resData) => {
-        let arr = comments;
-        for (i=0; i<arr.length; i++) {
-            if (arr[i].id == id) {
-                arr[i].likes ++;
-                arr[i].isLiked = !(arr[i].isLiked);
-                return;
-            }
-        }
-        setComments(arr);
+        getCommentsFromServer();
     })
 }
-
-const authApiHost = '';
-let token = '';
 
 export function authorization (login, password) {
     return fetch('https://wedev-api.sky.pro/api/user/login', {
@@ -156,16 +156,17 @@ export function authorization (login, password) {
         }
         return res.json();
     }).then ((resData) => {
-
-        alert('Успешный вход');
         token = resData.user.token;
+        userName = resData.user.name;
+        alert('Успешный вход');
+        getCommentsFromServer();
     }).catch((e) => {
         console.log(e);
     })
 }
 
-export function login(name, login, password) {
-    return fetch(authApiHost, {
+export function registrationApi(name, login, password) {
+    return fetch('https://wedev-api.sky.pro/api/user', {
         method: "POST",
         body: JSON.stringify({
             login: login,
@@ -182,9 +183,11 @@ export function login(name, login, password) {
         }
 
         return res.json();
-    }).then((resData) => {
-        alert('Успешная регистрация');
+    }).then ((resData) => {
         token = resData.user.token;
+        userName = resData.user.name;
+        alert('Успешная регистрация');
+        getCommentsFromServer();
     }).catch((e) => {
         console.log(e);
     })
