@@ -1,7 +1,7 @@
-import { dateRender } from "./utils.js";
 import { reply, addComment, mainLogButton, loginButton, registerButton, registration, funcLike, deleteButton } from "./initevent.js";
 import { container, comments } from "./main.js";
 import { token, userName } from "./api.js";
+import { format } from "date-fns";
 
 
 export function renderComments() { //рендер комментариев
@@ -16,7 +16,7 @@ export function renderComments() { //рендер комментариев
     return `<li class="comment" data-commId="${comment.text}">
       <div class="comment-header">
         <div>${comment.author.name}</div>
-        <div>${dateRender(comment.date)}</div>
+        <div>${format(comment.date, "yyyy-MM-dd hh.mm.ss")}</div>
       </div>
       <div class="comment-body">
         <div class="comment-text">${comment.text}</div>
